@@ -1,0 +1,68 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Modern Demo | Netlify</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Data Layer -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "pageView",
+      page: {
+        pageName: "home",
+        siteSection: "marketing",
+        language: "en"
+      }
+    });
+  </script>
+
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="script.js"></script>
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">ANALYTICS<span>.</span></div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="features.html">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#contact" class="btn">Get Started</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Understand Users.<br />Measure Everything.</h1>
+    <p>Modern analytics-ready site with clean dataLayer and click tracking.</p>
+    <button class="primary-btn" id="hero-cta">Start Free Trial</button>
+  </section>
+
+  <section class="features">
+    <div class="feature-card">
+      <h3>Clean Data Layer</h3>
+      <p>Structured page & event data ready for Adobe Analytics.</p>
+    </div>
+    <div class="feature-card">
+      <h3>Click Tracking</h3>
+      <p>Automatic tracking for all links and CTAs.</p>
+    </div>
+    <div class="feature-card">
+      <h3>Netlify Ready</h3>
+      <p>Zero build. Just deploy and go live.</p>
+    </div>
+  </section>
+
+  <section class="cta">
+    <h2>Ready to see real insights?</h2>
+    <button class="secondary-btn" id="footer-cta">Request Demo</button>
+  </section>
+
+  <footer>
+    <p>© 2026 Analytics Demo. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>
