@@ -8,148 +8,128 @@
   <script src="https://assets.adobedtm.com/8459819b208c/d0a7d922f30b/launch-15c4cd66f8eb.min.js"></script>
 
   <style>
-#emailPopup {
+#email-popup-overlay {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #111;
-  color: #fff;
-  padding: 14px 16px;
-  border-radius: 6px;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
   font-family: Arial, sans-serif;
+}
+
+#email-popup {
+  background: #fff;
+  width: 380px;
+  max-width: 90%;
+  padding: 28px 24px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+#email-popup h2 {
+  margin: 0 0 10px;
+  font-size: 22px;
+}
+
+#email-popup p {
   font-size: 14px;
-  max-width: 260px;
-  box-shadow: 0 4px 10px rgba(0,0,0,.25);
-  z-index: 2147483647;
-  pointer-events: auto;
+  color: #555;
 }
 
-#emailPopup * {
-  pointer-events: auto;
-}
-
-#emailPopup input {
+#email-popup input {
   width: 100%;
-  margin-top: 8px;
-  padding: 6px;
-  border-radius: 4px;
-  border: 0;
+  padding: 10px;
+  margin-top: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
 }
 
-#emailPopup button {
-  margin-top: 8px;
+#email-popup button {
   width: 100%;
-  padding: 6px;
-  background: #f04;
+  margin-top: 14px;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background: #e60023;
   color: #fff;
-  border: 0;
-  border-radius: 4px;
+  font-size: 15px;
   cursor: pointer;
 }
 
-#emailPopup .close {
+#email-popup .close {
   position: absolute;
-  top: 6px;
-  right: 8px;
+  top: 10px;
+  right: 14px;
+  font-size: 18px;
   cursor: pointer;
-  font-size: 12px;
-  opacity: .7;
+  color: #888;
 }
 </style>
 
 
+
 <script>
 (function () {
-  console.log('[Email Popup] Script loaded');
+  var DELAY = 1500;
+  var SESSION_KEY = 'email_popup_shown';
 
-  var DEBUG = true;
-  var DELAY_MS = 1500;
-
-  function log() {
-    if (DEBUG) console.log.apply(console, arguments);
-  }
-
-  function fireEvent(name, data) {
-    console.log('[Email Popup] Firing event:', name, data || {});
+  function dispatchPopupEvent() {
     document.dispatchEvent(
-      new CustomEvent(name, {
-        bubbles: true,   
-        detail: data || {}
+      new CustomEvent('email_popup_shown', {
+        bubbles: true,
+        detail: {
+          component: 'email_popup'
+        }
       })
     );
-  }
-  function initPopup() {
-    log('[Email Popup] Initializing popup');
-
-    if (sessionStorage.getItem('emailPopupShown')) {
-      log('[Email Popup] Already shown in this session');
-      return;
-    }
-
-    var popup = document.createElement('div');
-    popup.id = 'emailPopup';
-    popup.innerHTML =
-      '<span class="close" data-action="close">✕</span>' +
-      '<strong>Subscribe</strong><br>' +
-      'Get updates in your inbox' +
-      '<input type="email" id="emailInput" placeholder="Email address" />' +
-      '<button data-action="submit">Subscribe</button>';
-
-    document.body.appendChild(popup);
-    sessionStorage.setItem('emailPopupShown', 'true');
-
-    fireEvent('email_popup_shown', { component: 'email_popup' });
+    console.log('[Popup] CustomEvent dispatched: email_popup_shown');
   }
 
-  // 🔥 CAPTURE-PHASE CLICK HANDLER (KEY FIX)
-  document.addEventListener(
-    'click',
-    function (e) {
-      var popup = document.getElementById('emailPopup');
-      if (!popup) return;
+  function createPopup() {
+    if (sessionStorage.getItem(SESSION_KEY)) return;
 
-      var action = e.target.getAttribute('data-action');
+    var overlay = document.createElement('div');
+    overlay.id = 'email-popup-overlay';
 
-      if (action === 'close') {
-        log('[Email Popup] Close clicked');
-        popup.remove();
-        fireEvent('email_popup_closed', { component: 'email_popup' });
+    overlay.innerHTML = `
+      <div id="email-popup">
+        <span class="close">&times;</span>
+        <h2>Stay in the loop</h2>
+        <p>Get product updates and insights straight to your inbox.</p>
+        <input type="email" placeholder="Enter your email" />
+        <button>Subscribe</button>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+    sessionStorage.setItem(SESSION_KEY, 'true');
+
+    dispatchPopupEvent();
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target.classList.contains('close') || e.target === overlay) {
+        overlay.remove();
       }
-
-      if (action === 'submit') {
-        var email = document.getElementById('emailInput').value;
-        if (!email) {
-          log('[Email Popup] Empty email');
-          return;
-        }
-
-        log('[Email Popup] Subscribe clicked');
-        fireEvent('email_subscribe', {
-          email: email,
-          component: 'email_popup'
-        });
-
-        popup.innerHTML = 'Thanks for subscribing!';
-        setTimeout(function () {
-          popup.remove();
-        }, 1200);
-      }
-    },
-    true // 👈 capture phase (non-negotiable)
-  );
+    });
+  }
 
   function start() {
-    log('[Email Popup] Waiting', DELAY_MS, 'ms before showing popup');
-    setTimeout(initPopup, DELAY_MS);
+    setTimeout(createPopup, DELAY);
   }
 
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    start();
-  } else {
+  if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
   }
 })();
 </script>
+
 
 
 
