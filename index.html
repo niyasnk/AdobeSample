@@ -50,13 +50,75 @@
   }
   </style>
 
-  <script>
+  <style>
+#emailPopup {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #111;
+  color: #fff;
+  padding: 14px 16px;
+  border-radius: 6px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  max-width: 260px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.25);
+  z-index: 9999;
+}
+#emailPopup input {
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px;
+  border-radius: 4px;
+  border: 0;
+}
+#emailPopup button {
+  margin-top: 8px;
+  width: 100%;
+  padding: 6px;
+  background: #f04;
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+#emailPopup .close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  opacity: .7;
+}
+</style>
+
+<script>
 (function () {
   console.log('[Email Popup] Script loaded');
 
+  var DEBUG = true;
+  var DELAY_MS = 1500; // 🔥 delay so Launch can register listeners
+
+  function log() {
+    if (DEBUG) console.log.apply(console, arguments);
+  }
+
+  function fireEvent(name, data) {
+    log('[Email Popup] Firing event:', name, data || {});
+    document.dispatchEvent(
+      new CustomEvent(name, {
+        detail: data || {}
+      })
+    );
+  }
+
   function initPopup() {
-    if (sessionStorage.getItem('emailPopupShown')) return;
-    if (!document.body) return;
+    log('[Email Popup] Initializing popup');
+
+    if (sessionStorage.getItem('emailPopupShown')) {
+      log('[Email Popup] Already shown in this session');
+      return;
+    }
 
     var popup = document.createElement('div');
     popup.id = 'emailPopup';
@@ -64,45 +126,34 @@
       '<span class="close">✕</span>' +
       '<strong>Subscribe</strong><br>' +
       'Get updates in your inbox' +
-      '<input type="email" id="emailInput" />' +
+      '<input type="email" id="emailInput" placeholder="Email address" />' +
       '<button id="emailSubmit">Subscribe</button>';
 
     document.body.appendChild(popup);
     sessionStorage.setItem('emailPopupShown', 'true');
 
-    // 🔥 DO NOT touch dataLayer here
-    document.dispatchEvent(
-      new CustomEvent('email_popup_shown', {
-        detail: {
-          event: 'email_popup_shown',
-          component: 'email_popup'
-        }
-      })
-    );
+    // 🔥 Popup shown event
+    fireEvent('email_popup_shown', {
+      component: 'email_popup'
+    });
 
+    // Close event
     popup.querySelector('.close').onclick = function () {
       popup.remove();
-
-      document.dispatchEvent(
-        new CustomEvent('email_popup_closed', {
-          detail: { event: 'email_popup_closed' }
-        })
-      );
+      fireEvent('email_popup_closed', {
+        component: 'email_popup'
+      });
     };
 
+    // Subscribe event
     popup.querySelector('#emailSubmit').onclick = function () {
       var email = popup.querySelector('#emailInput').value;
       if (!email) return;
 
-      document.dispatchEvent(
-        new CustomEvent('email_subscribe', {
-          detail: {
-            event: 'email_subscribe',
-            email: email,
-            component: 'email_popup'
-          }
-        })
-      );
+      fireEvent('email_subscribe', {
+        email: email,
+        component: 'email_popup'
+      });
 
       popup.innerHTML = 'Thanks for subscribing!';
       setTimeout(function () {
@@ -111,13 +162,19 @@
     };
   }
 
-  if (document.body) {
-    initPopup();
+  function start() {
+    log('[Email Popup] Waiting', DELAY_MS, 'ms before showing popup');
+    setTimeout(initPopup, DELAY_MS);
+  }
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    start();
   } else {
-    document.addEventListener('DOMContentLoaded', initPopup);
+    document.addEventListener('DOMContentLoaded', start);
   }
 })();
 </script>
+
 
 
   <link rel="stylesheet" href="style.css" />
