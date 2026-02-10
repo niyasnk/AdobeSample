@@ -52,50 +52,52 @@
 
   <script>
   (function () {
-    // fast exit if already shown
-    if (sessionStorage.getItem('emailPopupShown')) return;
+    function initPopup() {
+      if (sessionStorage.getItem('emailPopupShown')) return;
 
-    // create popup
-    var popup = document.createElement('div');
-    popup.id = 'emailPopup';
-    popup.innerHTML =
-      '<span class="close">✕</span>' +
-      '<strong>Subscribe</strong><br>' +
-      'Get updates in your inbox' +
-      '<input type="email" id="emailInput" placeholder="Email address" />' +
-      '<button id="emailSubmit">Subscribe</button>';
+      var popup = document.createElement('div');
+      popup.id = 'emailPopup';
+      popup.innerHTML =
+        '<span class="close">✕</span>' +
+        '<strong>Subscribe</strong><br>' +
+        'Get updates in your inbox' +
+        '<input type="email" id="emailInput" placeholder="Email address" />' +
+        '<button id="emailSubmit">Subscribe</button>';
 
-    document.body.appendChild(popup);
-    sessionStorage.setItem('emailPopupShown', 'true');
+      document.body.appendChild(popup);
+      sessionStorage.setItem('emailPopupShown', 'true');
 
-    // ensure dataLayer object exists (NOT array)
-    window.dataLayer = window.dataLayer || {};
+      window.dataLayer = window.dataLayer || {};
+      window.dataLayer.event = 'email_popup_shown';
 
-    // popup shown event
-    window.dataLayer.event = 'email_popup_shown';
-
-    // close handler
-    popup.querySelector('.close').onclick = function () {
-      popup.remove();
-      window.dataLayer.event = 'email_popup_closed';
-    };
-
-    // submit handler
-    popup.querySelector('#emailSubmit').onclick = function () {
-      var email = popup.querySelector('#emailInput').value;
-      if (!email) return;
-
-      window.dataLayer.event = 'email_subscribe';
-      window.dataLayer.email = email;
-      window.dataLayer.component = 'email_popup';
-
-      popup.innerHTML = 'Thanks for subscribing!';
-      setTimeout(function () {
+      popup.querySelector('.close').onclick = function () {
         popup.remove();
-      }, 1200);
-    };
+        window.dataLayer.event = 'email_popup_closed';
+      };
+
+      popup.querySelector('#emailSubmit').onclick = function () {
+        var email = popup.querySelector('#emailInput').value;
+        if (!email) return;
+
+        window.dataLayer.event = 'email_subscribe';
+        window.dataLayer.email = email;
+        window.dataLayer.component = 'email_popup';
+
+        popup.innerHTML = 'Thanks for subscribing!';
+        setTimeout(function () {
+          popup.remove();
+        }, 1200);
+      };
+    }
+
+    if (document.body) {
+      initPopup();
+    } else {
+      document.addEventListener('DOMContentLoaded', initPopup);
+    }
   })();
   </script>
+
 
   <!-- Data Layer -->
   <script>
