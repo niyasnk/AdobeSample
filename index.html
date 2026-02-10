@@ -52,8 +52,20 @@
 
   <script>
   (function () {
+    console.log('[Email Popup] Script loaded');
+
     function initPopup() {
-      if (sessionStorage.getItem('emailPopupShown')) return;
+      console.log('[Email Popup] Initializing');
+
+      if (sessionStorage.getItem('emailPopupShown')) {
+        console.log('[Email Popup] Already shown in this session');
+        return;
+      }
+
+      if (!document.body) {
+        console.warn('[Email Popup] document.body not available');
+        return;
+      }
 
       var popup = document.createElement('div');
       popup.id = 'emailPopup';
@@ -65,38 +77,55 @@
         '<button id="emailSubmit">Subscribe</button>';
 
       document.body.appendChild(popup);
+      console.log('[Email Popup] Popup appended to DOM');
+
       sessionStorage.setItem('emailPopupShown', 'true');
 
       window.dataLayer = window.dataLayer || {};
       window.dataLayer.event = 'email_popup_shown';
+      console.log('[Email Popup] dataLayer event fired: email_popup_shown');
 
       popup.querySelector('.close').onclick = function () {
+        console.log('[Email Popup] Close clicked');
         popup.remove();
         window.dataLayer.event = 'email_popup_closed';
+        console.log('[Email Popup] dataLayer event fired: email_popup_closed');
       };
 
       popup.querySelector('#emailSubmit').onclick = function () {
         var email = popup.querySelector('#emailInput').value;
-        if (!email) return;
+
+        if (!email) {
+          console.warn('[Email Popup] Submit clicked with empty email');
+          return;
+        }
+
+        console.log('[Email Popup] Email submitted:', email);
 
         window.dataLayer.event = 'email_subscribe';
         window.dataLayer.email = email;
         window.dataLayer.component = 'email_popup';
 
+        console.log('[Email Popup] dataLayer event fired: email_subscribe');
+
         popup.innerHTML = 'Thanks for subscribing!';
         setTimeout(function () {
           popup.remove();
+          console.log('[Email Popup] Popup removed after success');
         }, 1200);
       };
     }
 
     if (document.body) {
+      console.log('[Email Popup] document.body available, running immediately');
       initPopup();
     } else {
+      console.log('[Email Popup] Waiting for DOMContentLoaded');
       document.addEventListener('DOMContentLoaded', initPopup);
     }
   })();
   </script>
+
 
 
   <!-- Data Layer -->
