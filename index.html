@@ -8,47 +8,75 @@
   <script src="https://assets.adobedtm.com/8459819b208c/d0a7d922f30b/launch-15c4cd66f8eb.min.js" async></script>
 
   <style>
-  /* ultra-light CSS */
+  /* centered, slightly larger popup */
   #emailPopup {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
     background: #111;
     color: #fff;
-    padding: 14px 16px;
-    border-radius: 6px;
+
+    padding: 24px 26px;
+    border-radius: 10px;
+
     font-family: Arial, sans-serif;
-    font-size: 14px;
-    max-width: 260px;
-    box-shadow: 0 4px 10px rgba(0,0,0,.25);
+    font-size: 16px;
+    line-height: 1.4;
+
+    width: 360px;
+    max-width: calc(100% - 40px);
+
+    box-shadow: 0 12px 30px rgba(0,0,0,.45);
     z-index: 9999;
   }
+
+  #emailPopup strong {
+    font-size: 18px;
+    display: block;
+    margin-bottom: 6px;
+  }
+
   #emailPopup input {
     width: 100%;
-    margin-top: 8px;
-    padding: 6px;
+    margin-top: 12px;
+    padding: 10px;
     border: 0;
-    border-radius: 4px;
+    border-radius: 6px;
+    font-size: 15px;
   }
+
   #emailPopup button {
-    margin-top: 8px;
+    margin-top: 12px;
     width: 100%;
-    padding: 6px;
+    padding: 10px;
+
     background: #f04;
     color: #fff;
+
     border: 0;
-    border-radius: 4px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: bold;
+
     cursor: pointer;
   }
+
   #emailPopup .close {
     position: absolute;
-    top: 6px;
-    right: 8px;
+    top: 10px;
+    right: 12px;
     cursor: pointer;
-    font-size: 12px;
-    opacity: .7;
+    font-size: 14px;
+    opacity: .6;
   }
-  </style>
+
+  #emailPopup .close:hover {
+    opacity: 1;
+  }
+</style>
+
 
   <script>
   (function () {
