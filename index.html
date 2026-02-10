@@ -77,12 +77,16 @@
         '<button id="emailSubmit">Subscribe</button>';
 
       document.body.appendChild(popup);
-      console.log('[Email Popup] Popup appended to DOM');
 
       sessionStorage.setItem('emailPopupShown', 'true');
 
       window.dataLayer = window.dataLayer || {};
       window.dataLayer.event = 'email_popup_shown';
+      document.dispatchEvent(
+      new CustomEvent('email_popup_shown', {
+          detail: window.dataLayer
+        })
+      );
       console.log('[Email Popup] dataLayer event fired: email_popup_shown');
 
       popup.querySelector('.close').onclick = function () {
