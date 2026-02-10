@@ -51,99 +51,74 @@
   </style>
 
   <script>
-  (function () {
-    console.log('[Email Popup] Script loaded');
+(function () {
+  console.log('[Email Popup] Script loaded');
 
-    function initPopup() {
-      console.log('[Email Popup] Initializing');
+  function initPopup() {
+    if (sessionStorage.getItem('emailPopupShown')) return;
+    if (!document.body) return;
 
-      if (sessionStorage.getItem('emailPopupShown')) {
-        console.log('[Email Popup] Already shown in this session');
-        return;
-      }
+    var popup = document.createElement('div');
+    popup.id = 'emailPopup';
+    popup.innerHTML =
+      '<span class="close">✕</span>' +
+      '<strong>Subscribe</strong><br>' +
+      'Get updates in your inbox' +
+      '<input type="email" id="emailInput" />' +
+      '<button id="emailSubmit">Subscribe</button>';
 
-      if (!document.body) {
-        console.warn('[Email Popup] document.body not available');
-        return;
-      }
+    document.body.appendChild(popup);
+    sessionStorage.setItem('emailPopupShown', 'true');
 
-      var popup = document.createElement('div');
-      popup.id = 'emailPopup';
-      popup.innerHTML =
-        '<span class="close">✕</span>' +
-        '<strong>Subscribe</strong><br>' +
-        'Get updates in your inbox' +
-        '<input type="email" id="emailInput" placeholder="Email address" />' +
-        '<button id="emailSubmit">Subscribe</button>';
-
-      document.body.appendChild(popup);
-
-      sessionStorage.setItem('emailPopupShown', 'true');
-
-      window.dataLayer = window.dataLayer || {};
-      window.dataLayer.event = 'email_popup_shown';
-      document.dispatchEvent(
+    // 🔥 DO NOT touch dataLayer here
+    document.dispatchEvent(
       new CustomEvent('email_popup_shown', {
-          detail: window.dataLayer
+        detail: {
+          event: 'email_popup_shown',
+          component: 'email_popup'
+        }
+      })
+    );
+
+    popup.querySelector('.close').onclick = function () {
+      popup.remove();
+
+      document.dispatchEvent(
+        new CustomEvent('email_popup_closed', {
+          detail: { event: 'email_popup_closed' }
         })
       );
-      console.log('[Email Popup] dataLayer event fired: email_popup_shown');
+    };
 
-      popup.querySelector('.close').onclick = function () {
-        console.log('[Email Popup] Close clicked');
+    popup.querySelector('#emailSubmit').onclick = function () {
+      var email = popup.querySelector('#emailInput').value;
+      if (!email) return;
+
+      document.dispatchEvent(
+        new CustomEvent('email_subscribe', {
+          detail: {
+            event: 'email_subscribe',
+            email: email,
+            component: 'email_popup'
+          }
+        })
+      );
+
+      popup.innerHTML = 'Thanks for subscribing!';
+      setTimeout(function () {
         popup.remove();
-        window.dataLayer.event = 'email_popup_closed';
-        console.log('[Email Popup] dataLayer event fired: email_popup_closed');
-      };
+      }, 1200);
+    };
+  }
 
-      popup.querySelector('#emailSubmit').onclick = function () {
-        var email = popup.querySelector('#emailInput').value;
+  if (document.body) {
+    initPopup();
+  } else {
+    document.addEventListener('DOMContentLoaded', initPopup);
+  }
+})();
+</script>
 
-        if (!email) {
-          console.warn('[Email Popup] Submit clicked with empty email');
-          return;
-        }
-
-        console.log('[Email Popup] Email submitted:', email);
-
-        window.dataLayer.event = 'email_subscribe';
-        window.dataLayer.email = email;
-        window.dataLayer.component = 'email_popup';
-
-        console.log('[Email Popup] dataLayer event fired: email_subscribe');
-
-        popup.innerHTML = 'Thanks for subscribing!';
-        setTimeout(function () {
-          popup.remove();
-          console.log('[Email Popup] Popup removed after success');
-        }, 1200);
-      };
-    }
-
-    if (document.body) {
-      console.log('[Email Popup] document.body available, running immediately');
-      initPopup();
-    } else {
-      console.log('[Email Popup] Waiting for DOMContentLoaded');
-      document.addEventListener('DOMContentLoaded', initPopup);
-    }
-  })();
-  </script>
-
-
-
-  <!-- Data Layer -->
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: "pageView",
-      page: {
-        pageName: "home",
-        siteSection: "marketing",
-        language: "en"
-      }
-    });
-  </script>
 
   <link rel="stylesheet" href="style.css" />
   <script defer src="script.js"></script>
