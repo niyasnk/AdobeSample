@@ -8,95 +8,86 @@
   <script src="https://assets.adobedtm.com/8459819b208c/d0a7d922f30b/launch-15c4cd66f8eb.min.js"></script>
 
   <style>
-#email-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999999;
-  font-family: Arial, sans-serif;
-}
+  #email-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    font-family: Arial, sans-serif;
+  }
 
-#email-modal {
-  background: #fff;
-  width: 420px;
-  padding: 24px;
-  border-radius: 8px;
-  text-align: center;
-}
+  #email-popup {
+    background: #fff;
+    width: 420px;
+    padding: 24px;
+    border-radius: 8px;
+    text-align: center;
+  }
 
-#email-modal h2 {
-  margin: 0 0 10px;
-}
+  #email-popup h2 {
+    margin: 0 0 10px;
+  }
 
-#email-modal input {
-  width: 100%;
-  padding: 10px;
-  margin-top: 12px;
-}
+  #email-popup input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 12px;
+    box-sizing: border-box;
+  }
 
-#email-modal button {
-  margin-top: 14px;
-  width: 100%;
-  padding: 10px;
-  background: #ff0044;
-  color: #fff;
-  border: 0;
-  cursor: pointer;
-}
+  #email-popup button {
+    margin-top: 14px;
+    width: 100%;
+    padding: 10px;
+    background: #ff0044;
+    color: #fff;
+    border: 0;
+    cursor: pointer;
+  }
 </style>
 
 <script>
 (function () {
   console.log('[Popup] Script loaded');
 
-  window.dataLayer = window.dataLayer || [];
+  function dispatchPopupEvent() {
+    console.log('[Popup] Dispatching CustomEvent: email_popup_shown');
 
-  function pushDL(eventName, payload) {
-    var obj = Object.assign({ event: eventName }, payload || {});
-    console.log('[Popup] dataLayer push:', obj);
-    window.dataLayer.push(obj);
+    document.dispatchEvent(
+      new CustomEvent('email_popup_shown', {
+        bubbles: true,
+        detail: {
+          component: 'email_popup'
+        }
+      })
+    );
   }
 
   function showPopup() {
-    if (sessionStorage.getItem('popupShown')) return;
+    if (document.getElementById('email-popup-overlay')) return;
 
-    var overlay = document.createElement('div');
-    overlay.id = 'email-overlay';
+    const overlay = document.createElement('div');
+    overlay.id = 'email-popup-overlay';
+
     overlay.innerHTML = `
-      <div id="email-modal">
+      <div id="email-popup">
         <h2>Subscribe</h2>
-        <p>Get updates straight to your inbox</p>
-        <input type="email" id="email-input" placeholder="Email address">
-        <button id="email-submit">Subscribe</button>
+        <p>Get updates in your inbox</p>
+        <input type="email" placeholder="Email address">
+        <button>Subscribe</button>
       </div>
     `;
 
     document.body.appendChild(overlay);
-    sessionStorage.setItem('popupShown', 'true');
 
-    // 🔥 THIS IS WHAT LAUNCH WILL CAPTURE
-    pushDL('email_popup_shown', {
-      component: 'email_popup'
-    });
-
-    overlay.addEventListener('click', function (e) {
-      if (e.target.id === 'email-submit') {
-        var email = document.getElementById('email-input').value;
-        if (!email) return;
-
-        pushDL('email_subscribe', {
-          component: 'email_popup',
-          email_entered: true
-        });
-
-        overlay.remove();
-      }
-    });
+    // 🔥 Fire custom event AFTER popup is in DOM
+    dispatchPopupEvent();
   }
 
+  // Delay just to simulate async popup behavior
   setTimeout(showPopup, 1500);
 })();
 </script>
