@@ -5,50 +5,102 @@
   <meta charset="UTF-8" />
   <title>Modern Demo | Netlify</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://assets.adobedtm.com/8459819b208c/d0a7d922f30b/launch-15c4cd66f8eb.min.js"></script>
+  <script src="https://assets.adobedtm.com/8459819b208c/d0a7d922f30b/launch-15c4cd66f8eb.min.js" async></script>
 
   <style>
-  #email-popup-overlay {
+  /* ultra-light CSS */
+  #emailPopup {
     position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999999;
+    bottom: 20px;
+    right: 20px;
+    background: #111;
+    color: #fff;
+    padding: 14px 16px;
+    border-radius: 6px;
     font-family: Arial, sans-serif;
+    font-size: 14px;
+    max-width: 260px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.25);
+    z-index: 9999;
   }
-
-  #email-popup {
-    background: #fff;
-    width: 420px;
-    padding: 24px;
-    border-radius: 8px;
-    text-align: center;
-  }
-
-  #email-popup h2 {
-    margin: 0 0 10px;
-  }
-
-  #email-popup input {
+  #emailPopup input {
     width: 100%;
-    padding: 10px;
-    margin-top: 12px;
-    box-sizing: border-box;
+    margin-top: 8px;
+    padding: 6px;
+    border: 0;
+    border-radius: 4px;
   }
-
-  #email-popup button {
-    margin-top: 14px;
+  #emailPopup button {
+    margin-top: 8px;
     width: 100%;
-    padding: 10px;
-    background: #ff0044;
+    padding: 6px;
+    background: #f04;
     color: #fff;
     border: 0;
+    border-radius: 4px;
     cursor: pointer;
   }
-</style>
- <script>
+  #emailPopup .close {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    opacity: .7;
+  }
+  </style>
+
+  <script>
+  (function () {
+    function initPopup() {
+      if (sessionStorage.getItem('emailPopupShown')) return;
+
+      var popup = document.createElement('div');
+      popup.id = 'emailPopup';
+      popup.innerHTML =
+        '<span class="close">✕</span>' +
+        '<strong>Subscribe</strong><br>' +
+        'Get updates in your inbox' +
+        '<input type="email" id="emailInput" placeholder="Email address" />' +
+        '<button id="emailSubmit">Subscribe</button>';
+
+      document.body.appendChild(popup);
+      sessionStorage.setItem('emailPopupShown', 'true');
+
+      window.dataLayer = window.dataLayer || {};
+      window.dataLayer.event = 'email_popup_shown';
+
+      popup.querySelector('.close').onclick = function () {
+        popup.remove();
+        window.dataLayer.event = 'email_popup_closed';
+      };
+
+      popup.querySelector('#emailSubmit').onclick = function () {
+        var email = popup.querySelector('#emailInput').value;
+        if (!email) return;
+
+        window.dataLayer.event = 'email_subscribe';
+        window.dataLayer.email = email;
+        window.dataLayer.component = 'email_popup';
+
+        popup.innerHTML = 'Thanks for subscribing!';
+        setTimeout(function () {
+          popup.remove();
+        }, 1200);
+      };
+    }
+
+    if (document.body) {
+      initPopup();
+    } else {
+      document.addEventListener('DOMContentLoaded', initPopup);
+    }
+  })();
+  </script>
+
+
+  <!-- Data Layer -->
+  <script>
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
       event: "pageView",
@@ -59,53 +111,6 @@
       }
     });
   </script>
-<script>
-(function () {
-  console.log('[Popup] Script loaded');
-
-  function dispatchPopupEvent() {
-    console.log('[Popup] Dispatching CustomEvent: email_popup_shown');
-
-    document.dispatchEvent(
-      new CustomEvent('email_popup_shown', {
-        bubbles: true,
-        detail: {
-          component: 'email_popup'
-        }
-      })
-    );
-  }
-
-  function showPopup() {
-    if (document.getElementById('email-popup-overlay')) return;
-
-    const overlay = document.createElement('div');
-    overlay.id = 'email-popup-overlay';
-
-    overlay.innerHTML = `
-      <div id="email-popup">
-        <h2>Subscribe</h2>
-        <p>Get updates in your inbox</p>
-        <input type="email" placeholder="Email address">
-        <button>Subscribe</button>
-      </div>
-    `;
-
-    document.body.appendChild(overlay);
-
-    // 🔥 Fire custom event AFTER popup is in DOM
-    dispatchPopupEvent();
-  }
-
-  // Delay just to simulate async popup behavior
-  setTimeout(showPopup, 1500);
-})();
-</script>
-
-
-
-
-
 
   <link rel="stylesheet" href="style.css" />
   <script defer src="script.js"></script>
