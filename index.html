@@ -6,6 +6,97 @@
   <title>Modern Demo | Netlify</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://assets.adobedtm.com/8459819b208c/d0a7d922f30b/launch-15c4cd66f8eb.min.js" async></script>
+
+  <style>
+  /* ultra-light CSS */
+  #emailPopup {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #111;
+    color: #fff;
+    padding: 14px 16px;
+    border-radius: 6px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    max-width: 260px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.25);
+    z-index: 9999;
+  }
+  #emailPopup input {
+    width: 100%;
+    margin-top: 8px;
+    padding: 6px;
+    border: 0;
+    border-radius: 4px;
+  }
+  #emailPopup button {
+    margin-top: 8px;
+    width: 100%;
+    padding: 6px;
+    background: #f04;
+    color: #fff;
+    border: 0;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  #emailPopup .close {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    opacity: .7;
+  }
+  </style>
+
+  <script>
+  (function () {
+    // fast exit if already shown
+    if (sessionStorage.getItem('emailPopupShown')) return;
+
+    // create popup
+    var popup = document.createElement('div');
+    popup.id = 'emailPopup';
+    popup.innerHTML =
+      '<span class="close">✕</span>' +
+      '<strong>Subscribe</strong><br>' +
+      'Get updates in your inbox' +
+      '<input type="email" id="emailInput" placeholder="Email address" />' +
+      '<button id="emailSubmit">Subscribe</button>';
+
+    document.body.appendChild(popup);
+    sessionStorage.setItem('emailPopupShown', 'true');
+
+    // ensure dataLayer object exists (NOT array)
+    window.dataLayer = window.dataLayer || {};
+
+    // popup shown event
+    window.dataLayer.event = 'email_popup_shown';
+
+    // close handler
+    popup.querySelector('.close').onclick = function () {
+      popup.remove();
+      window.dataLayer.event = 'email_popup_closed';
+    };
+
+    // submit handler
+    popup.querySelector('#emailSubmit').onclick = function () {
+      var email = popup.querySelector('#emailInput').value;
+      if (!email) return;
+
+      window.dataLayer.event = 'email_subscribe';
+      window.dataLayer.email = email;
+      window.dataLayer.component = 'email_popup';
+
+      popup.innerHTML = 'Thanks for subscribing!';
+      setTimeout(function () {
+        popup.remove();
+      }, 1200);
+    };
+  })();
+  </script>
+
   <!-- Data Layer -->
   <script>
     window.dataLayer = window.dataLayer || [];
