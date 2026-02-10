@@ -48,7 +48,17 @@
     cursor: pointer;
   }
 </style>
-
+ <script>
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "pageView",
+      page: {
+        pageName: "home",
+        siteSection: "marketing",
+        language: "en"
+      }
+    });
+  </script>
 <script>
 (function () {
   console.log('[Popup] Script loaded');
