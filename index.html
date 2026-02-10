@@ -70,12 +70,14 @@
   }
 
   function fireEvent(name, data) {
-    log('[Email Popup] Firing event:', name, data || {});
+    console.log('[Email Popup] Firing event:', name, data || {});
     document.dispatchEvent(
-      new CustomEvent(name, { detail: data || {} })
+      new CustomEvent(name, {
+        bubbles: true,   
+        detail: data || {}
+      })
     );
   }
-
   function initPopup() {
     log('[Email Popup] Initializing popup');
 
