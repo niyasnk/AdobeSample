@@ -63,7 +63,7 @@
   console.log('[Email Popup] Script loaded');
 
   var DEBUG = true;
-  var DELAY_MS = 1500; // 🔥 delay so Launch can register listeners
+  var DELAY_MS = 1500;
 
   function log() {
     if (DEBUG) console.log.apply(console, arguments);
@@ -72,9 +72,7 @@
   function fireEvent(name, data) {
     log('[Email Popup] Firing event:', name, data || {});
     document.dispatchEvent(
-      new CustomEvent(name, {
-        detail: data || {}
-      })
+      new CustomEvent(name, { detail: data || {} })
     );
   }
 
@@ -89,44 +87,54 @@
     var popup = document.createElement('div');
     popup.id = 'emailPopup';
     popup.innerHTML =
-      '<span class="close">✕</span>' +
+      '<span class="close" data-action="close">✕</span>' +
       '<strong>Subscribe</strong><br>' +
       'Get updates in your inbox' +
       '<input type="email" id="emailInput" placeholder="Email address" />' +
-      '<button id="emailSubmit">Subscribe</button>';
+      '<button data-action="submit">Subscribe</button>';
 
     document.body.appendChild(popup);
     sessionStorage.setItem('emailPopupShown', 'true');
 
-    // 🔥 Popup shown event
-    fireEvent('email_popup_shown', {
-      component: 'email_popup'
-    });
-
-    // Close event
-    popup.querySelector('.close').onclick = function () {
-      popup.remove();
-      fireEvent('email_popup_closed', {
-        component: 'email_popup'
-      });
-    };
-
-    // Subscribe event
-    popup.querySelector('#emailSubmit').onclick = function () {
-      var email = popup.querySelector('#emailInput').value;
-      if (!email) return;
-
-      fireEvent('email_subscribe', {
-        email: email,
-        component: 'email_popup'
-      });
-
-      popup.innerHTML = 'Thanks for subscribing!';
-      setTimeout(function () {
-        popup.remove();
-      }, 1200);
-    };
+    fireEvent('email_popup_shown', { component: 'email_popup' });
   }
+
+  // 🔥 CAPTURE-PHASE CLICK HANDLER (KEY FIX)
+  document.addEventListener(
+    'click',
+    function (e) {
+      var popup = document.getElementById('emailPopup');
+      if (!popup) return;
+
+      var action = e.target.getAttribute('data-action');
+
+      if (action === 'close') {
+        log('[Email Popup] Close clicked');
+        popup.remove();
+        fireEvent('email_popup_closed', { component: 'email_popup' });
+      }
+
+      if (action === 'submit') {
+        var email = document.getElementById('emailInput').value;
+        if (!email) {
+          log('[Email Popup] Empty email');
+          return;
+        }
+
+        log('[Email Popup] Subscribe clicked');
+        fireEvent('email_subscribe', {
+          email: email,
+          component: 'email_popup'
+        });
+
+        popup.innerHTML = 'Thanks for subscribing!';
+        setTimeout(function () {
+          popup.remove();
+        }, 1200);
+      }
+    },
+    true // 👈 capture phase (non-negotiable)
+  );
 
   function start() {
     log('[Email Popup] Waiting', DELAY_MS, 'ms before showing popup');
@@ -140,6 +148,7 @@
   }
 })();
 </script>
+
 
 
 
